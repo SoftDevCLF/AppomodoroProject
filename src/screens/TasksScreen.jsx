@@ -7,9 +7,9 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import taskData from '../../assets/data/tasks-data.json';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ItemList from '../components/tasks/item-list';
 import TodoForm from '../components/tasks/todo-form';
 
@@ -29,8 +29,10 @@ export default function TasksScreen() {
 
   function completeTask(taskId) {
     setTask(
-      task.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task,
+      task.map(taskItem =>
+        taskItem.id === taskId
+          ? { ...taskItem, completed: !taskItem.completed }
+          : taskItem,
       ),
     );
   }
@@ -56,6 +58,34 @@ export default function TasksScreen() {
       { cancelable: true },
     );
   }
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const storedTasks = await AsyncStorage.getItem('tasks');
+        if (storedTasks) {
+          setTask(JSON.parse(storedTasks));
+        } else {
+          setTask(taskData);
+        }
+      } catch (error) {
+        console.log('Error loading tasks:', error);
+      }
+    };
+    loadTasks();
+  }, []);
+
+  useEffect(() => {
+    const saveTasks = async () => {
+      try {
+        await AsyncStorage.setItem('tasks', JSON.stringify(task));
+      } catch (error) {
+        console.log('Error saving tasks:', error);
+      }
+    };
+    saveTasks();
+  }, [task]);
+
   return (
     <View style={styles.frame}>
       <ScrollView contentContainerStyle={styles.scrollViewStyle}>
