@@ -6,8 +6,15 @@ import {
   Image,
   Pressable,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
+
+  const handleStart = () => {
+    navigation.navigate('Start New Pomodoro');
+  };
+
   return (
     <View style={styles.frame}>
       <ImageBackground
@@ -24,7 +31,7 @@ export default function HomeScreen() {
             />
           </View>
           <Text style={styles.text}>Welcome to Appomodoro Timer!</Text>
-          <Pressable>
+          <Pressable onPress={handleStart} style={styles.startButton}>
             <View style={styles.pressableStyle}>
               <Text style={styles.pressableText}>Get Started</Text>
             </View>
