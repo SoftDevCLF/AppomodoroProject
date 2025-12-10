@@ -6,8 +6,9 @@ import {
   Image,
   Pressable,
 } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function NewPomodoroScreen() {
   const [timeLeft, setTimeLeft] = useState(25 * 60);
@@ -15,25 +16,58 @@ export default function NewPomodoroScreen() {
   const [isPaused, setIsPaused] = useState(false);
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [timerType, setTimerType] = useState('pomodoro');
+  const [defaultPomodoro, setDefaultPomodoro] = useState(25);
+  const [shortBreak, setShortBreak] = useState(5);
+  const [longBreak, setLongBreak] = useState(15);
   const intervalRef = useRef(null);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const defaultPomodoro = await AsyncStorage.getItem('defaultPomodoro');
-        const count = await AsyncStorage.getItem('pomodoroCount');
-        if (defaultPomodoro) {
-          setTimeLeft(parseInt(defaultPomodoro) * 60);
+  const loadSettings = useCallback(async () => {
+    try {
+      const savedPomodoro = await AsyncStorage.getItem('defaultPomodoro');
+      const savedShortBreak = await AsyncStorage.getItem('shortBreak');
+      const savedLongBreak = await AsyncStorage.getItem('longBreak');
+      const count = await AsyncStorage.getItem('pomodoroCount');
+
+      if (savedPomodoro) {
+        const pomVal = parseInt(savedPomodoro, 10);
+        setDefaultPomodoro(pomVal);
+        if (!isRunning && timerType === 'pomodoro') {
+          setTimeLeft(pomVal * 60);
         }
-        if (count) {
-          setPomodoroCount(parseInt(count));
-        }
-      } catch (error) {
-        console.log('Error loading settings:', error);
       }
-    };
+      if (savedShortBreak) {
+        const shortVal = parseInt(savedShortBreak, 10);
+        setShortBreak(shortVal);
+        if (!isRunning && timerType === 'shortBreak') {
+          setTimeLeft(shortVal * 60);
+        }
+      }
+      if (savedLongBreak) {
+        const longVal = parseInt(savedLongBreak, 10);
+        setLongBreak(longVal);
+        if (!isRunning && timerType === 'longBreak') {
+          setTimeLeft(longVal * 60);
+        }
+      }
+      if (count) {
+        setPomodoroCount(parseInt(count, 10));
+      }
+    } catch (error) {
+      console.log('Error loading settings:', error);
+    }
+  }, [isRunning, timerType]);
+
+  //Load settings on mount
+  useEffect(() => {
     loadSettings();
-  }, []);
+  }, [loadSettings]);
+
+  //Reload settings when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadSettings();
+    }, [loadSettings]),
+  );
 
   useEffect(() => {
     if (isRunning && !isPaused && timeLeft > 0) {
@@ -52,18 +86,13 @@ export default function NewPomodoroScreen() {
                 });
                 return newCount;
               });
-              AsyncStorage.getItem('defaultPomodoro').then(val => {
-                setTimeLeft((val ? parseInt(val) : 25) * 60);
-              }).catch(() => {
-                setTimeLeft(25 * 60);
-              });
+              setTimeLeft(defaultPomodoro * 60);
+            } else if (timerType === 'shortBreak') {
+              setTimerType('pomodoro');
+              setTimeLeft(defaultPomodoro * 60);
             } else {
               setTimerType('pomodoro');
-              AsyncStorage.getItem('defaultPomodoro').then(val => {
-                setTimeLeft((val ? parseInt(val) : 25) * 60);
-              }).catch(() => {
-                setTimeLeft(25 * 60);
-              });
+              setTimeLeft(defaultPomodoro * 60);
             }
             return 0;
           }
@@ -84,7 +113,7 @@ export default function NewPomodoroScreen() {
         intervalRef.current = null;
       }
     };
-  }, [isRunning, isPaused, timerType]);
+  }, [isRunning, isPaused, timerType, defaultPomodoro, timeLeft]);
 
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
@@ -108,17 +137,8 @@ export default function NewPomodoroScreen() {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    if (timerType === 'pomodoro') {
-      const val = await AsyncStorage.getItem('defaultPomodoro');
-      setTimeLeft((val ? parseInt(val) : 25) * 60);
-    } else if (timerType === 'shortBreak') {
-      const val = await AsyncStorage.getItem('shortBreak');
-      setTimeLeft((val ? parseInt(val) : 5) * 60);
-    } else {
-      const val = await AsyncStorage.getItem('longBreak');
-      setTimeLeft((val ? parseInt(val) : 15) * 60);
-    }
     setTimerType('pomodoro');
+    setTimeLeft(defaultPomodoro * 60);
   };
 
   const handleBreak = async () => {
@@ -128,9 +148,19 @@ export default function NewPomodoroScreen() {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    const shortBreak = await AsyncStorage.getItem('shortBreak');
-    setTimeLeft((shortBreak ? parseInt(shortBreak) : 5) * 60);
+    setTimeLeft(shortBreak * 60);
     setTimerType('shortBreak');
+  };
+
+  const handleLongBreak = () => {
+    setIsRunning(false);
+    setIsPaused(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setTimeLeft(longBreak * 60);
+    setTimerType('longBreak');
   };
 
   return (
@@ -144,6 +174,14 @@ export default function NewPomodoroScreen() {
         <View style={styles.content}>
           <Text style={styles.count}>
             Pomodoro count: <Text style={styles.countNum}>{pomodoroCount}</Text>
+          </Text>
+
+          <Text style={styles.timerLabel}>
+            {timerType === 'pomodoro'
+              ? 'Focus Time'
+              : timerType === 'shortBreak'
+              ? 'Short Break'
+              : 'Long Break'}
           </Text>
 
           <View style={styles.hero}>
@@ -167,14 +205,17 @@ export default function NewPomodoroScreen() {
                 <Pressable onPress={handleStop} style={styles.btnStop}>
                   <Text style={styles.btnText}>STOP</Text>
                 </Pressable>
-                <View style={styles.btnGroup}>
-                  <Pressable onPress={handlePause} style={styles.btnControl}>
-                    <Text style={styles.btnText}>
-                      {isPaused ? 'RESUME' : 'PAUSE'}
-                    </Text>
-                  </Pressable>
+                <Pressable onPress={handlePause} style={styles.btnPauseResume}>
+                  <Text style={styles.btnText}>
+                    {isPaused ? 'RESUME' : 'PAUSE'}
+                  </Text>
+                </Pressable>
+                <View style={styles.breakButtonGroup}>
                   <Pressable onPress={handleBreak} style={styles.btnControl}>
-                    <Text style={styles.btnText}>BREAK</Text>
+                    <Text style={styles.btnText}>SHORT BREAK</Text>
+                  </Pressable>
+                  <Pressable onPress={handleLongBreak} style={styles.btnControl}>
+                    <Text style={styles.btnText}>LONG BREAK</Text>
                   </Pressable>
                 </View>
               </>
@@ -217,6 +258,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontStyle: 'italic',
     fontSize: 30,
+  },
+  timerLabel: {
+    fontFamily: 'PixelifySans-Bold',
+    fontSize: 18,
+    color: '#8F2A1E',
+    textAlign: 'center',
+    marginBottom: 10,
   },
   hero: {
     marginTop: 10,
@@ -274,17 +322,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  btnPauseResume: {
+    width: 240,
+    height: 54,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#ED5345',
+    backgroundColor: '#FFE4E4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   btnGroup: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
+    gap: 8,
     marginTop: 10,
     marginBottom: 25,
     width: '100%',
     flexWrap: 'wrap',
   },
+  breakButtonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 25,
+    width: '100%',
+  },
   btnControl: {
-    width: 112,
+    width: 110,
     height: 54,
     borderRadius: 10,
     borderWidth: 3,
@@ -299,5 +365,6 @@ const styles = StyleSheet.create({
     fontFamily: 'PixelifySans-Bold',
     fontSize: 20,
     letterSpacing: 1,
+    textAlign: 'center',
   },
 });
