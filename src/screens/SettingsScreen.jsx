@@ -138,7 +138,7 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.scrollViewStyle}>
         <View style={styles.title}>
           <Image
-            source={require('../../assets/img/logo1.png')}
+            source={require('../../assets/img/settingstomato.png')}
             style={styles.logoStyle}
           />
           <Text style={styles.titleText}>Settings</Text>
