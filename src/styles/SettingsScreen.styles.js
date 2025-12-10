@@ -78,6 +78,7 @@ export default StyleSheet.create({
     borderWidth: 2,
     borderColor: '#f4b871',
     backgroundColor: '#fff',
+    marginTop: 8,
     alignItems: 'center',
   },
   selectOptionActive: {
@@ -93,6 +94,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    marginTop: 15,
   },
   switchLabel: {
     fontSize: 18,
@@ -100,6 +102,7 @@ export default StyleSheet.create({
     color: '#3E2723',
   },
   helpButton: {
+    flex: 1,
     backgroundColor: '#ffdede',
     color: '#861d0a',
     borderRadius: 10,
@@ -107,12 +110,26 @@ export default StyleSheet.create({
     borderColor: '#f44527',
     padding: 15,
     alignItems: 'center',
-    marginTop: 10,
   },
   helpButtonText: {
     color: '#861d0a',
     fontFamily: 'PixelifySans-Bold',
     fontSize: 18,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  resourceButton: {
+    flex: 1,
+    backgroundColor: '#ffdede',
+    color: '#861d0a',
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#f44527',
+    padding: 15,
+    alignItems: 'center',
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -211,5 +228,10 @@ export default StyleSheet.create({
     color: '#861d0a',
     fontFamily: 'PixelifySans-Bold',
     fontSize: 14,
+  },
+  resourceLinkText: {
+    color: '#007AFF',
+    fontSize: 17,
+    fontFamily: 'PixelifySans-Bold',
   },
 });

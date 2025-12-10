@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Modal,
+  Linking,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +20,7 @@ export default function SettingsScreen() {
   const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const [notifications, setNotifications] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
 
 
   useEffect(() => {
@@ -228,12 +230,20 @@ export default function SettingsScreen() {
             />
             <Text style={styles.switchLabel}>Notifications</Text>
           </View>
-          <Pressable
-            style={styles.helpButton}
-            onPress={() => setShowHelpModal(true)}
-          >
-            <Text style={styles.helpButtonText}>Help & Support</Text>
-          </Pressable>
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={styles.helpButton}
+              onPress={() => setShowHelpModal(true)}
+            >
+              <Text style={styles.helpButtonText}>Help & Support</Text>
+            </Pressable>
+            <Pressable
+              style={styles.resourceButton}
+              onPress={() => setShowResourcesModal(true)}
+            >
+              <Text style={styles.helpButtonText}>Resources</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
 
@@ -264,6 +274,74 @@ export default function SettingsScreen() {
               ))}
             </ScrollView>
 
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showResourcesModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowResourcesModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Resources</Text>
+              <Pressable
+                onPress={() => setShowResourcesModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.faqList}>
+              <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Pomodoro Technique Guide</Text>
+                <Pressable
+                  onPress={() =>
+                    Linking.openURL(
+                      'https://en.wikipedia.org/wiki/Pomodoro_Technique',
+                    )
+                  }
+                >
+                  <Text style={styles.resourceLinkText}>
+                    Learn More →
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>
+                  Time Management Tips
+                </Text>
+                <Pressable
+                  onPress={() =>
+                    Linking.openURL(
+                      'https://summer.harvard.edu/blog/8-time-management-tips-for-students/',
+                    )
+                  }
+                >
+                  <Text style={styles.resourceLinkText}>
+                    Explore →
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Productivity Guide</Text>
+                <Pressable
+                  onPress={() =>
+                    Linking.openURL(
+                      'https://www.youtube.com/watch?v=lbtte7iTS9g',
+                    )
+                  }
+                >
+                  <Text style={styles.resourceLinkText}>
+                    Check it out →
+                  </Text>
+                </Pressable>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
