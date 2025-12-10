@@ -234,4 +234,11 @@ export default StyleSheet.create({
     fontSize: 17,
     fontFamily: 'PixelifySans-Bold',
   },
+  errorText: {
+    fontSize: 12,
+    fontFamily: 'PixelifySans-Bold',
+    color: '#d32f2f',
+    marginBottom: 12,
+    marginTop: -4,
+  },
 });

@@ -21,6 +21,9 @@ export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showResourcesModal, setShowResourcesModal] = useState(false);
+  const [pomodoroError, setPomodoroError] = useState('');
+  const [shortBreakError, setShortBreakError] = useState('');
+  const [longBreakError, setLongBreakError] = useState('');
 
 
   useEffect(() => {
@@ -47,6 +50,9 @@ export default function SettingsScreen() {
     const value = parseInt(defaultPomodoro, 10);
     if (value >= 25 && value <= 50) {
       await AsyncStorage.setItem('defaultPomodoro', defaultPomodoro);
+      setPomodoroError('');
+    } else {
+      setPomodoroError('Please stay within 25-50 minutes');
     }
   };
 
@@ -54,6 +60,9 @@ export default function SettingsScreen() {
     const value = parseInt(shortBreak, 10);
     if (value >= 5 && value <= 10) {
       await AsyncStorage.setItem('shortBreak', shortBreak);
+      setShortBreakError('');
+    } else {
+      setShortBreakError('Please stay within 5-10 minutes');
     }
   };
 
@@ -61,6 +70,9 @@ export default function SettingsScreen() {
     const value = parseInt(longBreak, 10);
     if (value >= 15 && value <= 20) {
       await AsyncStorage.setItem('longBreak', longBreak);
+      setLongBreakError('');
+    } else {
+      setLongBreakError('Please stay within 15-20 minutes');
     }
   };
 
@@ -159,6 +171,9 @@ export default function SettingsScreen() {
               <Text style={styles.setButtonText}>Set</Text>
             </Pressable>
           </View>
+          {pomodoroError ? (
+            <Text style={styles.errorText}>{pomodoroError}</Text>
+          ) : null}
 
           <Text style={styles.label}>Set Short Break</Text>
           <View style={styles.inputGroup}>
@@ -174,6 +189,9 @@ export default function SettingsScreen() {
               <Text style={styles.setButtonText}>Set</Text>
             </Pressable>
           </View>
+          {shortBreakError ? (
+            <Text style={styles.errorText}>{shortBreakError}</Text>
+          ) : null}
 
           <Text style={styles.label}>Set Long Break</Text>
           <View style={styles.inputGroup}>
@@ -189,6 +207,9 @@ export default function SettingsScreen() {
               <Text style={styles.setButtonText}>Set</Text>
             </Pressable>
           </View>
+          {longBreakError ? (
+            <Text style={styles.errorText}>{longBreakError}</Text>
+          ) : null}
 
           <Text style={styles.label}>Select Alarm Sound</Text>
           <View style={styles.selectContainer}>
