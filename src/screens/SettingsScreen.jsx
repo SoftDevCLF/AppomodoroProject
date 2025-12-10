@@ -7,6 +7,7 @@ import {
   Switch,
   ScrollView,
   Image,
+  Modal,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +18,8 @@ export default function SettingsScreen() {
   const [longBreak, setLongBreak] = useState('15');
   const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -27,14 +29,11 @@ export default function SettingsScreen() {
         const lBreak = await AsyncStorage.getItem('longBreak');
         const sound = await AsyncStorage.getItem('alarmSound');
         const notif = await AsyncStorage.getItem('notifications');
-        const dark = await AsyncStorage.getItem('darkMode');
-
         if (pomodoro) setDefaultPomodoro(pomodoro);
         if (sBreak) setShortBreak(sBreak);
         if (lBreak) setLongBreak(lBreak);
         if (sound) setAlarmSound(sound);
         if (notif !== null) setNotifications(notif === 'true');
-        if (dark !== null) setDarkMode(dark === 'true');
       } catch (error) {
         console.log('Error loading settings:', error);
       }
@@ -43,21 +42,21 @@ export default function SettingsScreen() {
   }, []);
 
   const handleSetPomodoro = async () => {
-    const value = parseInt(defaultPomodoro);
+    const value = parseInt(defaultPomodoro, 10);
     if (value >= 25 && value <= 50) {
       await AsyncStorage.setItem('defaultPomodoro', defaultPomodoro);
     }
   };
 
   const handleSetShortBreak = async () => {
-    const value = parseInt(shortBreak);
+    const value = parseInt(shortBreak, 10);
     if (value >= 5 && value <= 10) {
       await AsyncStorage.setItem('shortBreak', shortBreak);
     }
   };
 
   const handleSetLongBreak = async () => {
-    const value = parseInt(longBreak);
+    const value = parseInt(longBreak, 10);
     if (value >= 15 && value <= 20) {
       await AsyncStorage.setItem('longBreak', longBreak);
     }
@@ -73,10 +72,63 @@ export default function SettingsScreen() {
     await AsyncStorage.setItem('notifications', value.toString());
   };
 
-  const handleDarkModeChange = async value => {
-    setDarkMode(value);
-    await AsyncStorage.setItem('darkMode', value.toString());
-  };
+  const faqs = [
+    {
+      id: 1,
+      question: 'What is the Pomodoro Technique?',
+      answer:
+        'The Pomodoro Technique is a time management method using twenty-five minute focused work intervals "pomodoros" followed by short breaks.',
+    },
+    {
+      id: 2,
+      question: 'How do I change the timer duration?',
+      answer:
+        'On the settings page adjust the Default Pomodoro, Short Break, or Long Break duration using the input fields.',
+    },
+    {
+      id: 3,
+      question: 'Can I customize alarm sounds?',
+      answer:
+        'Yes! In Settings, select from the available alarm sounds: Classic, Chimes, or Waves.',
+    },
+    {
+      id: 4,
+      question: 'What If I miss a notification?',
+      answer:
+        'Make sure to enable notifications in Settings to ensure you never miss a timer alert.',
+    },
+    {
+      id: 5,
+      question: 'How do I track my productivity stats?',
+      answer:
+        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
+    },
+    {
+      id: 5,
+      question: 'How do I track my productivity stats?',
+      answer:
+        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
+    },
+    {
+      id: 5,
+      question: 'How do I track my productivity stats?',
+      answer:
+        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
+    },
+    {
+      id: 5,
+      question: 'How do I track my productivity stats?',
+      answer:
+        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
+    },
+    {
+      id: 6,
+      question: 'What is the tasks section for?',
+      answer:
+        'The tasks section is where you can manage custom tasks and it functions like a simple to-do list.',
+    }
+
+  ];
 
   return (
     <View style={styles.frame}>
@@ -175,22 +227,35 @@ export default function SettingsScreen() {
             />
             <Text style={styles.switchLabel}>Notifications</Text>
           </View>
-
-          <View style={styles.switchContainer}>
-            <Switch
-              value={darkMode}
-              onValueChange={handleDarkModeChange}
-              trackColor={{ false: '#767577', true: '#f87963' }}
-              thumbColor={darkMode ? '#f44527' : '#f4f3f4'}
-            />
-            <Text style={styles.switchLabel}>Dark Mode</Text>
-          </View>
-
-          <Pressable style={styles.helpButton}>
+          <Pressable
+            style={styles.helpButton}
+            onPress={() => setShowHelpModal(true)}
+          >
             <Text style={styles.helpButtonText}>Help & Support</Text>
           </Pressable>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showHelpModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowHelpModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Help & Support</Text>
+              <Pressable
+                onPress={() => setShowHelpModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -315,5 +380,114 @@ const styles = StyleSheet.create({
     color: '#861d0a',
     fontFamily: 'PixelifySans-Bold',
     fontSize: 18,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff6e7',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+    maxHeight: '90%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: '#f4b871',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: 'PixelifySans-Bold',
+    color: '#3E2723',
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffdede',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#f44527',
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: '#861d0a',
+    fontFamily: 'PixelifySans-Bold',
+  },
+  searchBar: {
+    margin: 15,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: '#f4b871',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    fontFamily: 'PressStart2P-Regular',
+    fontSize: 12,
+    color: '#3E2723',
+  },
+  faqList: {
+    paddingHorizontal: 15,
+    maxHeight: 300,
+  },
+  faqItem: {
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#f4b871',
+  },
+  faqQuestion: {
+    fontSize: 18,
+    fontFamily: 'PixelifySans-Bold',
+    color: '#3E2723',
+    marginBottom: 8,
+  },
+  faqAnswer: {
+    fontSize: 14,
+    fontFamily: 'PixelifySans-Bold',
+    color: '#5e5c5c',
+    lineHeight: 18,
+  },
+  noResultsText: {
+    fontSize: 14,
+    fontFamily: 'PixelifySans-Bold',
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  contactSection: {
+    paddingHorizontal: 15,
+    paddingTop: 15,
+    borderTopWidth: 2,
+    borderTopColor: '#f4b871',
+  },
+  contactTitle: {
+    fontSize: 16,
+    fontFamily: 'PixelifySans-Bold',
+    color: '#3E2723',
+    marginBottom: 10,
+  },
+  contactButton: {
+    backgroundColor: '#ffdede',
+    borderWidth: 3,
+    borderColor: '#f44527',
+    borderRadius: 10,
+    padding: 12,
+    alignItems: 'center',
+  },
+  contactButtonText: {
+    color: '#861d0a',
+    fontFamily: 'PixelifySans-Bold',
+    fontSize: 14,
   },
 });
