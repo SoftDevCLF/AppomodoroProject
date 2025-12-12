@@ -101,10 +101,6 @@ export default function NewPomodoroScreen() {
                 AsyncStorage.setItem('pomodoroCount', newCount.toString());
                 return newCount;
               });
-              setTimeLeft(defaultPomodoro * 60);
-            } else {
-              setTimerType('pomodoro');
-              setTimeLeft(defaultPomodoro * 60);
             }
           }
           return newTime;
@@ -190,15 +186,7 @@ export default function NewPomodoroScreen() {
 
           {/* ---- Controls ---- */}
           <View style={styles.cta}>
-            {/* Show Reset button if timer reached 0 */}
-            {timeLeft === 0 ? (
-              <Pressable
-                onPress={() => setTimeLeft(timerType === 'pomodoro' ? defaultPomodoro * 60 : timerType === 'shortBreak' ? shortBreak * 60 : longBreak * 60)}
-                style={styles.btnStart} // reuse start button style
-              >
-                <Text style={styles.btnText}>RESET</Text>
-              </Pressable>
-            ) : !isRunning ? (
+            {!isRunning ? (
               <Pressable onPress={handleStart} style={styles.btnStart}>
                 <Text style={styles.btnText}>START</Text>
               </Pressable>
