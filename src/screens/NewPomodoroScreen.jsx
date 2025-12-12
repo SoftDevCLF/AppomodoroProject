@@ -207,12 +207,6 @@ export default function NewPomodoroScreen() {
               </>
             )}
           </View>
-
-          <View style={{ marginTop: 12, alignItems: 'center' }}>
-            <Pressable onPress={() => playAlarm(alarmSound)} style={styles.btnControl}>
-              <Text style={styles.btnText}>Play Alarm (Debug)</Text>
-            </Pressable>
-          </View>
         </View>
       </ImageBackground>
     </View>
