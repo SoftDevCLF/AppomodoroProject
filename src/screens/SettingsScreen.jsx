@@ -60,7 +60,7 @@ export default function SettingsScreen() {
 
   const handleSetShortBreak = async () => {
     const value = parseInt(shortBreak, 10);
-    if (value >= 5 && value <= 10) {
+    if (value >= 1 && value <= 10) {
       await AsyncStorage.setItem('shortBreak', shortBreak);
       setShortBreakError('');
     } else {
