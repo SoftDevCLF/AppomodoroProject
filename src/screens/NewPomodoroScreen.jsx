@@ -4,7 +4,6 @@ import {
   ImageBackground,
   Image,
   Pressable,
-  Alert
 } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
