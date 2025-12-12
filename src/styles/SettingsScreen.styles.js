@@ -13,7 +13,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff6e7',
+
     padding: 10,
     borderRadius: 12,
     marginBottom: 14,
@@ -28,7 +28,6 @@ export default StyleSheet.create({
     fontFamily: 'PixelifySans-Bold',
   },
   content: {
-    backgroundColor: '#fff6e7',
     borderRadius: 12,
     padding: 16,
   },

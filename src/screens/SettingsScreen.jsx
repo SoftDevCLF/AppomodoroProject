@@ -8,6 +8,7 @@ import {
   Image,
   Modal,
   Linking,
+  ImageBackground,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -130,12 +131,19 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.frame}>
+      <ImageBackground
+        source={require('../../assets/img/bg.png')}
+        style={styles.backgroundImage}
+        imageStyle={styles.imageStyle}
+        resizeMode="cover"
+      > 
       <ScrollView contentContainerStyle={styles.scrollViewStyle}>
         <View style={styles.title}>
           <Image
             source={require('../../assets/img/settingstomato.png')}
             style={styles.logoStyle}
           />
+          
           <Text style={styles.titleText}>Settings</Text>
         </View>
 
@@ -291,7 +299,6 @@ export default function SettingsScreen() {
                 </View>
               ))}
             </ScrollView>
-
           </View>
         </View>
       </Modal>
@@ -360,9 +367,11 @@ export default function SettingsScreen() {
                 </Pressable>
               </View>
             </ScrollView>
+            
           </View>
         </View>
       </Modal>
+      </ImageBackground>
     </View>
   );
 }
