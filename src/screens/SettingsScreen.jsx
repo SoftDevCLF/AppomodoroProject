@@ -12,6 +12,7 @@ import {
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../styles/SettingsScreen.styles';
+import { playAlarm } from '../utils/soundPlayer';
 
 export default function SettingsScreen() {
   const [defaultPomodoro, setDefaultPomodoro] = useState('25');
@@ -119,24 +120,6 @@ export default function SettingsScreen() {
     },
     {
       id: 6,
-      question: 'How do I track my productivity stats?',
-      answer:
-        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
-    },
-    {
-      id: 7,
-      question: 'How do I track my productivity stats?',
-      answer:
-        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
-    },
-    {
-      id: 8,
-      question: 'How do I track my productivity stats?',
-      answer:
-        'Visit the Stats screen to view your completed pomodoros, break times, and productivity trends.',
-    },
-    {
-      id: 9,
       question: 'What is the tasks section for?',
       answer:
         'The tasks section is where you can manage custom tasks and it functions like a simple to-do list.',
@@ -213,35 +196,49 @@ export default function SettingsScreen() {
 
           <Text style={styles.label}>Select Alarm Sound</Text>
           <View style={styles.selectContainer}>
+            {/* Classic Button */}
             <Pressable
               style={[
                 styles.selectOption,
                 alarmSound === 'sound1.mp3' && styles.selectOptionActive,
               ]}
-              onPress={() => handleAlarmSoundChange('sound1.mp3')}
+              onPress={() => {
+                playAlarm('sound1.mp3'); // play sound preview
+                handleAlarmSoundChange('sound1.mp3'); // save selection
+              }}
             >
               <Text style={styles.selectOptionText}>Classic</Text>
             </Pressable>
+
+            {/* Chimes Button */}
             <Pressable
               style={[
                 styles.selectOption,
                 alarmSound === 'sound2.mp3' && styles.selectOptionActive,
               ]}
-              onPress={() => handleAlarmSoundChange('sound2.mp3')}
+              onPress={() => {
+                playAlarm('sound2.mp3');
+                handleAlarmSoundChange('sound2.mp3');
+              }}
             >
               <Text style={styles.selectOptionText}>Chimes</Text>
             </Pressable>
+
+            {/* Waves Button*/}
             <Pressable
               style={[
                 styles.selectOption,
                 alarmSound === 'sound3.mp3' && styles.selectOptionActive,
               ]}
-              onPress={() => handleAlarmSoundChange('sound3.mp3')}
+              onPress={() => {
+                playAlarm('sound3.mp3');
+                handleAlarmSoundChange('sound3.mp3');
+              }}
             >
               <Text style={styles.selectOptionText}>Waves</Text>
             </Pressable>
-          </View>
 
+          </View>
           <View style={styles.switchContainer}>
             <Switch
               value={notifications}

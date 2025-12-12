@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  StyleSheet,
   ImageBackground,
   Image,
   Pressable,
@@ -10,6 +9,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from '../styles/NewPomorodoScreen.styles';
+import { playAlarm } from '../utils/soundPlayer';
 
 export default function NewPomodoroScreen() {
   const [timeLeft, setTimeLeft] = useState(25 * 60);
@@ -20,101 +20,97 @@ export default function NewPomodoroScreen() {
   const [defaultPomodoro, setDefaultPomodoro] = useState(25);
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
+  const [alarmSound, setAlarmSound] = useState('alarm1');
   const intervalRef = useRef(null);
+
+  // ---- Helpers ----
+  const clearTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
 
   const loadSettings = useCallback(async () => {
     try {
-      const savedPomodoro = await AsyncStorage.getItem('defaultPomodoro');
-      const savedShortBreak = await AsyncStorage.getItem('shortBreak');
-      const savedLongBreak = await AsyncStorage.getItem('longBreak');
-      const count = await AsyncStorage.getItem('pomodoroCount');
+      const [savedPomodoro, savedShortBreak, savedLongBreak, savedAlarm, count] =
+        await Promise.all([
+          AsyncStorage.getItem('defaultPomodoro'),
+          AsyncStorage.getItem('shortBreak'),
+          AsyncStorage.getItem('longBreak'),
+          AsyncStorage.getItem('alarmSound'),
+          AsyncStorage.getItem('pomodoroCount'),
+        ]);
 
       if (savedPomodoro) {
         const pomVal = parseInt(savedPomodoro, 10);
         setDefaultPomodoro(pomVal);
-        if (!isRunning && timerType === 'pomodoro') {
-          setTimeLeft(pomVal * 60);
-        }
+        if (!isRunning && timerType === 'pomodoro') setTimeLeft(pomVal * 60);
       }
       if (savedShortBreak) {
         const shortVal = parseInt(savedShortBreak, 10);
         setShortBreak(shortVal);
-        if (!isRunning && timerType === 'shortBreak') {
-          setTimeLeft(shortVal * 60);
-        }
+        if (!isRunning && timerType === 'shortBreak') setTimeLeft(shortVal * 60);
       }
       if (savedLongBreak) {
         const longVal = parseInt(savedLongBreak, 10);
         setLongBreak(longVal);
-        if (!isRunning && timerType === 'longBreak') {
-          setTimeLeft(longVal * 60);
-        }
+        if (!isRunning && timerType === 'longBreak') setTimeLeft(longVal * 60);
       }
-      if (count) {
-        setPomodoroCount(parseInt(count, 10));
-      }
+      if (savedAlarm) setAlarmSound(savedAlarm);
+      if (count) setPomodoroCount(parseInt(count, 10));
     } catch (error) {
       console.log('Error loading settings:', error);
     }
   }, [isRunning, timerType]);
 
-  //Load settings on mount
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
 
-  //Reload settings when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadSettings();
-    }, [loadSettings]),
+    }, [loadSettings])
   );
 
+  // ---- Timer Effect ----
   useEffect(() => {
-    if (isRunning && !isPaused && timeLeft > 0) {
+    if (isRunning && !isPaused) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => {
+          if (prev <= 0) return 0;
+
           const newTime = prev - 1;
 
           if (newTime <= 0) {
+            // Play alarm safely
+            playAlarm(alarmSound);
+
             setIsRunning(false);
 
             if (timerType === 'pomodoro') {
-              setPomodoroCount(currentCount => {
-                const newCount = currentCount + 1;
-                AsyncStorage.setItem('pomodoroCount', newCount.toString()).catch(err => {
-                  console.log('Error saving count:', err);
-                });
+              setPomodoroCount(current => {
+                const newCount = current + 1;
+                AsyncStorage.setItem('pomodoroCount', newCount.toString());
                 return newCount;
               });
-              setTimeLeft(defaultPomodoro * 60);
-            } else if (timerType === 'shortBreak') {
-              setTimerType('pomodoro');
               setTimeLeft(defaultPomodoro * 60);
             } else {
               setTimerType('pomodoro');
               setTimeLeft(defaultPomodoro * 60);
             }
-            return 0;
           }
 
           return newTime;
         });
       }, 1000);
     } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      clearTimer();
     }
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [isRunning, isPaused, timerType, defaultPomodoro, timeLeft]);
+    return () => clearTimer();
+  }, [isRunning, isPaused, timerType, defaultPomodoro, alarmSound]);
 
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
@@ -122,48 +118,39 @@ export default function NewPomodoroScreen() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // ---- Controls ----
   const handleStart = () => {
     setIsRunning(true);
     setIsPaused(false);
   };
 
-  const handlePause = () => {
-    setIsPaused(!isPaused);
-  };
+  const handlePause = () => setIsPaused(prev => !prev);
 
-  const handleStop = async () => {
+  const handleStop = () => {
     setIsRunning(false);
     setIsPaused(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+    clearTimer();
     setTimerType('pomodoro');
     setTimeLeft(defaultPomodoro * 60);
   };
 
-  const handleBreak = async () => {
+  const handleBreak = () => {
     setIsRunning(false);
     setIsPaused(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setTimeLeft(shortBreak * 60);
+    clearTimer();
     setTimerType('shortBreak');
+    setTimeLeft(shortBreak * 60);
   };
 
   const handleLongBreak = () => {
     setIsRunning(false);
     setIsPaused(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setTimeLeft(longBreak * 60);
+    clearTimer();
     setTimerType('longBreak');
+    setTimeLeft(longBreak * 60);
   };
 
+  // ---- UI ----
   return (
     <View style={styles.frame}>
       <ImageBackground
@@ -207,9 +194,7 @@ export default function NewPomodoroScreen() {
                   <Text style={styles.btnText}>STOP</Text>
                 </Pressable>
                 <Pressable onPress={handlePause} style={styles.btnPauseResume}>
-                  <Text style={styles.btnText}>
-                    {isPaused ? 'RESUME' : 'PAUSE'}
-                  </Text>
+                  <Text style={styles.btnText}>{isPaused ? 'RESUME' : 'PAUSE'}</Text>
                 </Pressable>
                 <View style={styles.breakButtonGroup}>
                   <Pressable onPress={handleBreak} style={styles.btnControl}>
@@ -221,6 +206,12 @@ export default function NewPomodoroScreen() {
                 </View>
               </>
             )}
+          </View>
+
+          <View style={{ marginTop: 12, alignItems: 'center' }}>
+            <Pressable onPress={() => playAlarm(alarmSound)} style={styles.btnControl}>
+              <Text style={styles.btnText}>Play Alarm (Debug)</Text>
+            </Pressable>
           </View>
         </View>
       </ImageBackground>
