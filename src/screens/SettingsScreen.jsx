@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../styles/SettingsScreen.styles';
 import { playAlarm } from '../utils/soundPlayer';
+import { stopAlarm } from '../utils/soundPlayer';
 
 export default function SettingsScreen() {
   const [defaultPomodoro, setDefaultPomodoro] = useState('25');
@@ -245,6 +246,11 @@ export default function SettingsScreen() {
             >
               <Text style={styles.selectOptionText}>Waves</Text>
             </Pressable>
+            <View style={{ marginTop: 15, alignItems: 'center'  }}>
+              <Pressable onPress={() => stopAlarm()} style={[styles.btn, { width: 86 }]}>
+                <Text style={styles.btnText}>Stop Preview</Text>
+              </Pressable>
+            </View>
 
           </View>
           <View style={styles.switchContainer}>
