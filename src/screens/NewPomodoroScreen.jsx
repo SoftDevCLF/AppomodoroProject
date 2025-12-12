@@ -4,12 +4,14 @@ import {
   ImageBackground,
   Image,
   Pressable,
+  Alert
 } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from '../styles/NewPomorodoScreen.styles';
 import { playAlarm } from '../utils/soundPlayer';
+import { notifyTimesUp } from '../utils/notifications';
 
 export default function NewPomodoroScreen() {
   const [timeLeft, setTimeLeft] = useState(25 * 60);
@@ -20,7 +22,7 @@ export default function NewPomodoroScreen() {
   const [defaultPomodoro, setDefaultPomodoro] = useState(25);
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
-  const [alarmSound, setAlarmSound] = useState('alarm1');
+  const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const intervalRef = useRef(null);
 
   // ---- Helpers ----
@@ -79,16 +81,20 @@ export default function NewPomodoroScreen() {
     if (isRunning && !isPaused) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => {
+
           if (prev <= 0) return 0;
 
           const newTime = prev - 1;
 
-          if (newTime <= 0) {
-            // Play alarm safely
+          if (newTime === 0) {
+            // Play alarm and show alert
             playAlarm(alarmSound);
+            notifyTimesUp();
 
+            //Stop the timer
             setIsRunning(false);
 
+            //Update pomodoro count if needed
             if (timerType === 'pomodoro') {
               setPomodoroCount(current => {
                 const newCount = current + 1;
@@ -101,7 +107,6 @@ export default function NewPomodoroScreen() {
               setTimeLeft(defaultPomodoro * 60);
             }
           }
-
           return newTime;
         });
       }, 1000);
@@ -183,12 +188,21 @@ export default function NewPomodoroScreen() {
             <Text style={styles.timerDigits}>{formatTime(timeLeft)}</Text>
           </View>
 
+          {/* ---- Controls ---- */}
           <View style={styles.cta}>
-            {!isRunning ? (
+            {/* Show Reset button if timer reached 0 */}
+            {timeLeft === 0 ? (
+              <Pressable
+                onPress={() => setTimeLeft(timerType === 'pomodoro' ? defaultPomodoro * 60 : timerType === 'shortBreak' ? shortBreak * 60 : longBreak * 60)}
+                style={styles.btnStart} // reuse start button style
+              >
+                <Text style={styles.btnText}>RESET</Text>
+              </Pressable>
+            ) : !isRunning ? (
               <Pressable onPress={handleStart} style={styles.btnStart}>
                 <Text style={styles.btnText}>START</Text>
               </Pressable>
-            ) : (
+            ) : timerType === 'pomodoro' ? (
               <>
                 <Pressable onPress={handleStop} style={styles.btnStop}>
                   <Text style={styles.btnText}>STOP</Text>
@@ -205,10 +219,28 @@ export default function NewPomodoroScreen() {
                   </Pressable>
                 </View>
               </>
+            ) : (
+              <>
+                <Pressable onPress={handlePause} style={styles.btnPauseResume}>
+                  <Text style={styles.btnText}>{isPaused ? 'RESUME' : 'PAUSE'}</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setTimerType('pomodoro');
+                    setTimeLeft(defaultPomodoro * 60);
+                    setIsRunning(true);
+                    setIsPaused(false);
+                  }}
+                  style={styles.btnPauseResume}
+                >
+                  <Text style={styles.btnText}>BACK TO TIMER</Text>
+                </Pressable>
+              </>
             )}
           </View>
         </View>
       </ImageBackground>
     </View>
+
   );
 }
