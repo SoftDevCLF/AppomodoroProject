@@ -24,7 +24,7 @@ export default function NewPomodoroScreen() {
   const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const intervalRef = useRef(null);
 
-  // ---- Helpers ----
+
   const clearTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -75,7 +75,7 @@ export default function NewPomodoroScreen() {
     }, [loadSettings])
   );
 
-  // ---- Timer Effect ----
+  //Timer Effect
   useEffect(() => {
     if (isRunning && !isPaused) {
       intervalRef.current = setInterval(() => {
@@ -108,7 +108,6 @@ export default function NewPomodoroScreen() {
     } else {
       clearTimer();
     }
-
     return () => clearTimer();
   }, [isRunning, isPaused, timerType, defaultPomodoro, alarmSound]);
 
@@ -118,14 +117,19 @@ export default function NewPomodoroScreen() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ---- Controls ----
+  //Timer Controls
+
+  //Starts timer
   const handleStart = () => {
     setIsRunning(true);
     setIsPaused(false);
   };
 
+  //Pauses timer
   const handlePause = () => setIsPaused(prev => !prev);
 
+
+  //Stops the timer entirely 
   const handleStop = () => {
     setIsRunning(false);
     setIsPaused(false);
@@ -134,6 +138,7 @@ export default function NewPomodoroScreen() {
     setTimeLeft(defaultPomodoro * 60);
   };
 
+  //Changes to a short break timer
   const handleBreak = () => {
     setIsRunning(false);
     setIsPaused(false);
@@ -141,7 +146,8 @@ export default function NewPomodoroScreen() {
     setTimerType('shortBreak');
     setTimeLeft(shortBreak * 60);
   };
-
+  
+  //Changes to a long break timer
   const handleLongBreak = () => {
     setIsRunning(false);
     setIsPaused(false);
@@ -150,9 +156,11 @@ export default function NewPomodoroScreen() {
     setTimeLeft(longBreak * 60);
   };
 
-  // ---- UI ----
+
   return (
+
     <View style={styles.frame}>
+      {/*Settings Page styles*/}
       <ImageBackground
         source={require('../../assets/img/bg.png')}
         style={styles.backgroundImage}
@@ -183,7 +191,7 @@ export default function NewPomodoroScreen() {
             <Text style={styles.timerDigits}>{formatTime(timeLeft)}</Text>
           </View>
 
-          {/* ---- Controls ---- */}
+          {/*Controls*/}
           <View style={styles.cta}>
             {!isRunning ? (
               <Pressable onPress={handleStart} style={styles.btnStart}>

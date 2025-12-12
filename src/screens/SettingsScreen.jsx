@@ -29,6 +29,7 @@ export default function SettingsScreen() {
   const [longBreakError, setLongBreakError] = useState('');
 
 
+  //Load settings from AsyncStorage
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -49,6 +50,7 @@ export default function SettingsScreen() {
     loadSettings();
   }, []);
 
+  //Validate and save default Pomodoro duration
   const handleSetPomodoro = async () => {
     const value = parseInt(defaultPomodoro, 10);
     if (value >= 25 && value <= 50) {
@@ -59,9 +61,10 @@ export default function SettingsScreen() {
     }
   };
 
+  //Validate and save short break duration
   const handleSetShortBreak = async () => {
     const value = parseInt(shortBreak, 10);
-    if (value >= 1 && value <= 10) {
+    if (value >= 5 && value <= 10) {
       await AsyncStorage.setItem('shortBreak', shortBreak);
       setShortBreakError('');
     } else {
@@ -69,6 +72,7 @@ export default function SettingsScreen() {
     }
   };
 
+  //Validate and save long break duration
   const handleSetLongBreak = async () => {
     const value = parseInt(longBreak, 10);
     if (value >= 15 && value <= 20) {
@@ -79,16 +83,19 @@ export default function SettingsScreen() {
     }
   };
 
+  //Change alarm sound and set it on timer page
   const handleAlarmSoundChange = async value => {
     setAlarmSound(value);
     await AsyncStorage.setItem('alarmSound', value);
   };
 
+  //Change and set notifications toggle
   const handleNotificationsChange = async value => {
     setNotifications(value);
     await AsyncStorage.setItem('notifications', value.toString());
   };
 
+  //FAQS for Help & Support modal
   const faqs = [
     {
       id: 1,
@@ -129,9 +136,9 @@ export default function SettingsScreen() {
 
   ];
 
-
   return (
     <View style={styles.frame}>
+      {/* Background image for the settings screen */}
       <ImageBackground
         source={require('../../assets/img/bg.png')}
         style={styles.backgroundImage}
@@ -148,6 +155,7 @@ export default function SettingsScreen() {
           <Text style={styles.titleText}>Settings</Text>
         </View>
 
+         {/*Time Inputs*/}
         <View style={styles.content}>
           <Text style={styles.label}>Set Default Pomodoro</Text>
           <View style={styles.inputGroup}>
@@ -184,7 +192,6 @@ export default function SettingsScreen() {
           {shortBreakError ? (
             <Text style={styles.errorText}>{shortBreakError}</Text>
           ) : null}
-
           <Text style={styles.label}>Set Long Break</Text>
           <View style={styles.inputGroup}>
             <TextInput
@@ -202,9 +209,9 @@ export default function SettingsScreen() {
           {longBreakError ? (
             <Text style={styles.errorText}>{longBreakError}</Text>
           ) : null}
-
           <Text style={styles.label}>Select Alarm Sound</Text>
           <View style={styles.selectContainer}>
+            
             {/* Classic Button */}
             <Pressable
               style={[
@@ -218,7 +225,6 @@ export default function SettingsScreen() {
             >
               <Text style={styles.selectOptionText}>Classic</Text>
             </Pressable>
-
             {/* Chimes Button */}
             <Pressable
               style={[
@@ -232,7 +238,6 @@ export default function SettingsScreen() {
             >
               <Text style={styles.selectOptionText}>Chimes</Text>
             </Pressable>
-
             {/* Waves Button*/}
             <Pressable
               style={[
@@ -253,6 +258,7 @@ export default function SettingsScreen() {
             </View>
 
           </View>
+          {/* Notifications Toggle */}
           <View style={styles.switchContainer}>
             <Switch
               value={notifications}
@@ -278,7 +284,8 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
-
+      
+      {/* Help Modal */}
       <Modal
         visible={showHelpModal}
         transparent={true}
@@ -309,6 +316,7 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
+      {/* Resources Modal */}
       <Modal
         visible={showResourcesModal}
         transparent={true}
