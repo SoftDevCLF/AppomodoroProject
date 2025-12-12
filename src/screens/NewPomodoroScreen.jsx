@@ -17,6 +17,81 @@ export default function NewPomodoroScreen() {
   const [timerType, setTimerType] = useState('pomodoro');
   const intervalRef = useRef(null);
 
+  
+  const savePomodoroRecord = async (timerType, duration) => {
+    try {
+      const record = {
+        emoji: timerType === 'pomodoro' ? '🍅' : '💤',
+        title: timerType === 'pomodoro' ? 'Focus Session' : 'Break',
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        minutes: duration,
+      };
+
+      const existing = await AsyncStorage.getItem('recentPomodoros');
+      const parsed = existing ? JSON.parse(existing) : [];
+
+      const updated = [record, ...parsed].slice(0, 20);
+
+      await AsyncStorage.setItem(
+        'recentPomodoros',
+        JSON.stringify(updated)
+      );
+
+      console.log('Saved recent record:', record);
+    } catch (err) {
+      console.log('Error saving pomodoro record:', err);
+    }
+  };
+
+
+const updateWeeklyStats = async (type) => {
+  try {
+    const today = new Date();
+    const dayIndex = today.getDay();
+
+    const existing = await AsyncStorage.getItem('weeklyStats');
+    const stats = existing
+      ? JSON.parse(existing)
+      : { focused: 0, breaks: 0, streak: 0, daily: [0,0,0,0,0,0,0], lastActive: null };
+
+
+    if (type === 'pomodoro') {
+      stats.daily[dayIndex] += 1;    
+      stats.focused += 25;           
+    } else {
+      stats.breaks += 1;
+    }
+
+
+    const todayStr = today.toDateString();
+
+    if (!stats.lastActive) {
+      stats.streak = 1;
+    } else {
+      const lastDate = new Date(stats.lastActive);
+      const diffDays = Math.floor(
+        (today - lastDate) / (1000 * 60 * 60 * 24)
+      );
+
+      if (diffDays === 1) {
+        stats.streak += 1;
+      } else if (diffDays > 1) {
+        stats.streak = 1;
+      }
+    } 
+
+    stats.lastActive = todayStr;
+
+    await AsyncStorage.setItem('weeklyStats', JSON.stringify(stats));
+  } catch (err) {
+    console.log('Error updating weekly stats:', err);
+  }
+};
+
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -44,6 +119,17 @@ export default function NewPomodoroScreen() {
           if (newTime <= 0) {
             setIsRunning(false);
 
+            const handleSessionComplete = async () => {
+
+              const duration =
+                timerType === 'pomodoro'
+                  ? parseInt((await AsyncStorage.getItem('defaultPomodoro')) || 25)
+                  : parseInt((await AsyncStorage.getItem('shortBreak')) || 5);
+
+              await savePomodoroRecord(timerType, duration);
+
+              await updateWeeklyStats(timerType, duration);
+
             if (timerType === 'pomodoro') {
               setPomodoroCount(currentCount => {
                 const newCount = currentCount + 1;
@@ -64,7 +150,9 @@ export default function NewPomodoroScreen() {
               }).catch(() => {
                 setTimeLeft(25 * 60);
               });
-            }
+            }};
+            handleSessionComplete(console.log("SESSION COMPLETE - saving stats now..."));
+
             return 0;
           }
 
