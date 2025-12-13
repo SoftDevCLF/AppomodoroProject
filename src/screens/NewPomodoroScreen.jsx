@@ -25,6 +25,28 @@ export default function NewPomodoroScreen() {
   const intervalRef = useRef(null);
 
 
+// Daily reset effect
+useEffect(() => {
+  const resetDailyPomodoro = async () => {
+    try {
+      const today = new Date().toDateString();
+      const lastDate = await AsyncStorage.getItem('lastPomodoroDate');
+
+      if (lastDate !== today) {
+        // It's a new day: reset the Pomodoro count
+        setPomodoroCount(0);
+        await AsyncStorage.setItem('pomodoroCount', '0');
+        await AsyncStorage.setItem('lastPomodoroDate', today);
+      }
+    } catch (error) {
+      console.log('Error resetting daily Pomodoro count:', error);
+    }
+  };
+
+  resetDailyPomodoro();
+}, []);
+
+
   const clearTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -34,6 +56,7 @@ export default function NewPomodoroScreen() {
 
   const loadSettings = useCallback(async () => {
     try {
+      //Get all settings and Pomodoro data from AsyncStorage
       const [savedPomodoro, savedShortBreak, savedLongBreak, savedAlarm, count] =
         await Promise.all([
           AsyncStorage.getItem('defaultPomodoro'),
@@ -42,6 +65,8 @@ export default function NewPomodoroScreen() {
           AsyncStorage.getItem('alarmSound'),
           AsyncStorage.getItem('pomodoroCount'),
         ]);
+
+
 
       if (savedPomodoro) {
         const pomVal = parseInt(savedPomodoro, 10);
@@ -75,6 +100,7 @@ export default function NewPomodoroScreen() {
     }, [loadSettings])
   );
 
+
   //Timer Effect
   useEffect(() => {
     if (isRunning && !isPaused) {
@@ -88,7 +114,11 @@ export default function NewPomodoroScreen() {
           if (newTime === 0) {
             // Play alarm and show alert
             playAlarm(alarmSound);
-            notifyTimesUp();
+             if (timerType === 'pomodoro') {
+                notifyTimesUp('work');
+              } else {
+                notifyTimesUp('break');
+              }
 
             //Update pomodoro count if needed
             if (timerType === 'pomodoro') {
@@ -196,9 +226,11 @@ export default function NewPomodoroScreen() {
         resizeMode="cover"
       >
         <View style={styles.content}>
-          <Text style={styles.count}>
-            Pomodoro count: <Text style={styles.countNum}>{pomodoroCount}</Text>
-          </Text>
+            <View style={styles.container}>
+              <Text style={styles.count}>Pomodoro count:</Text>
+              <Text style={styles.countNum}>{pomodoroCount}</Text>
+            </View>
+
 
           <Text style={styles.timerLabel}>
             {timerType === 'pomodoro'
