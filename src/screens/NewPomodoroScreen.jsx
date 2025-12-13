@@ -90,16 +90,27 @@ export default function NewPomodoroScreen() {
             playAlarm(alarmSound);
             notifyTimesUp();
 
-            //Stop the timer
-            setIsRunning(false);
-
             //Update pomodoro count if needed
             if (timerType === 'pomodoro') {
+              //Increment pomodoro count
               setPomodoroCount(current => {
                 const newCount = current + 1;
                 AsyncStorage.setItem('pomodoroCount', newCount.toString());
+                // Automatically start next break
+                if (newCount % 4 === 0) {
+                  setTimerType('longBreak');
+                  setTimeLeft(longBreak * 60);
+                } else {
+                  setTimerType('shortBreak');
+                  setTimeLeft(shortBreak * 60);
+                }
+                setIsPaused(false); //start break
                 return newCount;
               });
+            } else {
+              //Break ends start new pomodoro
+               setTimerType('pomodoro');
+                setTimeLeft(defaultPomodoro * 60);
             }
           }
           return newTime;
@@ -109,7 +120,7 @@ export default function NewPomodoroScreen() {
       clearTimer();
     }
     return () => clearTimer();
-  }, [isRunning, isPaused, timerType, defaultPomodoro, alarmSound]);
+  }, [isRunning, isPaused, timerType, defaultPomodoro, shortBreak, longBreak, alarmSound, pomodoroCount]);
 
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
@@ -143,19 +154,36 @@ export default function NewPomodoroScreen() {
     setIsRunning(false);
     setIsPaused(false);
     clearTimer();
+
+    if ((pomodoroCount + 1) % 4 === 0) {
+    // Long break after every 4th pomodoro
+    setTimerType('longBreak');
+    setTimeLeft(longBreak * 60);
+  } else {
+    // Otherwise, short break
     setTimerType('shortBreak');
     setTimeLeft(shortBreak * 60);
+  }
   };
-  
-  //Changes to a long break timer
-  const handleLongBreak = () => {
+
+  //Skip break handler
+  const handleSkipBreak = () => {
     setIsRunning(false);
     setIsPaused(false);
     clearTimer();
-    setTimerType('longBreak');
-    setTimeLeft(longBreak * 60);
-  };
 
+    //Increase pomodoro count
+     // Increase pomodoro count
+  setPomodoroCount(current => {
+    const newCount = current + 1;
+    AsyncStorage.setItem('pomodoroCount', newCount.toString());
+    return newCount;
+  });
+
+  // Reset to pomodoro
+  setTimerType('pomodoro');
+  setTimeLeft(defaultPomodoro * 60);
+};
 
   return (
 
@@ -206,29 +234,15 @@ export default function NewPomodoroScreen() {
                   <Text style={styles.btnText}>{isPaused ? 'RESUME' : 'PAUSE'}</Text>
                 </Pressable>
                 <View style={styles.breakButtonGroup}>
-                  <Pressable onPress={handleBreak} style={styles.btnControl}>
-                    <Text style={styles.btnText}>SHORT BREAK</Text>
-                  </Pressable>
-                  <Pressable onPress={handleLongBreak} style={styles.btnControl}>
-                    <Text style={styles.btnText}>LONG BREAK</Text>
+                  <Pressable onPress={handleBreak} style={styles.btnPauseResume}>
+                    <Text style={styles.btnText}>BREAK</Text>
                   </Pressable>
                 </View>
               </>
             ) : (
               <>
-                <Pressable onPress={handlePause} style={styles.btnPauseResume}>
-                  <Text style={styles.btnText}>{isPaused ? 'RESUME' : 'PAUSE'}</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    setTimerType('pomodoro');
-                    setTimeLeft(defaultPomodoro * 60);
-                    setIsRunning(true);
-                    setIsPaused(false);
-                  }}
-                  style={styles.btnPauseResume}
-                >
-                  <Text style={styles.btnText}>BACK TO TIMER</Text>
+                <Pressable onPress={handleSkipBreak} style={styles.btnPauseResume}>
+                  <Text style={styles.btnText}>SKIP THE BREAK</Text>
                 </Pressable>
               </>
             )}
