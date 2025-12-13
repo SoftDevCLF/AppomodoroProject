@@ -24,29 +24,6 @@ export default function NewPomodoroScreen() {
   const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const intervalRef = useRef(null);
 
-
-// Daily reset effect
-useEffect(() => {
-  const resetDailyPomodoro = async () => {
-    try {
-      const today = new Date().toDateString();
-      const lastDate = await AsyncStorage.getItem('lastPomodoroDate');
-
-      if (lastDate !== today) {
-        // It's a new day: reset the Pomodoro count
-        setPomodoroCount(0);
-        await AsyncStorage.setItem('pomodoroCount', '0');
-        await AsyncStorage.setItem('lastPomodoroDate', today);
-      }
-    } catch (error) {
-      console.log('Error resetting daily Pomodoro count:', error);
-    }
-  };
-
-  resetDailyPomodoro();
-}, []);
-
-
   const clearTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -55,40 +32,42 @@ useEffect(() => {
   };
 
   const loadSettings = useCallback(async () => {
-    try {
-      //Get all settings and Pomodoro data from AsyncStorage
-      const [savedPomodoro, savedShortBreak, savedLongBreak, savedAlarm, count] =
-        await Promise.all([
-          AsyncStorage.getItem('defaultPomodoro'),
-          AsyncStorage.getItem('shortBreak'),
-          AsyncStorage.getItem('longBreak'),
-          AsyncStorage.getItem('alarmSound'),
-          AsyncStorage.getItem('pomodoroCount'),
-        ]);
+  try {
+    const today = new Date().toDateString();
+    const lastDate = await AsyncStorage.getItem('lastPomodoroDate');
 
+    let shouldReset = lastDate !== today;
 
-
-      if (savedPomodoro) {
-        const pomVal = parseInt(savedPomodoro, 10);
-        setDefaultPomodoro(pomVal);
-        if (!isRunning && timerType === 'pomodoro') setTimeLeft(pomVal * 60);
-      }
-      if (savedShortBreak) {
-        const shortVal = parseInt(savedShortBreak, 10);
-        setShortBreak(shortVal);
-        if (!isRunning && timerType === 'shortBreak') setTimeLeft(shortVal * 60);
-      }
-      if (savedLongBreak) {
-        const longVal = parseInt(savedLongBreak, 10);
-        setLongBreak(longVal);
-        if (!isRunning && timerType === 'longBreak') setTimeLeft(longVal * 60);
-      }
-      if (savedAlarm) setAlarmSound(savedAlarm);
-      if (count) setPomodoroCount(parseInt(count, 10));
-    } catch (error) {
-      console.log('Error loading settings:', error);
+    if (shouldReset) {
+      await AsyncStorage.setItem('pomodoroCount', '0');
+      await AsyncStorage.setItem('lastPomodoroDate', today);
+      setPomodoroCount(0);
     }
-  }, [isRunning, timerType]);
+
+    const [savedPomodoro, savedShortBreak, savedLongBreak, savedAlarm, count] =
+      await Promise.all([
+        AsyncStorage.getItem('defaultPomodoro'),
+        AsyncStorage.getItem('shortBreak'),
+        AsyncStorage.getItem('longBreak'),
+        AsyncStorage.getItem('alarmSound'),
+        AsyncStorage.getItem('pomodoroCount'),
+      ]);
+
+    if (savedPomodoro) setDefaultPomodoro(parseInt(savedPomodoro, 10));
+    if (savedShortBreak) setShortBreak(parseInt(savedShortBreak, 10));
+    if (savedLongBreak) setLongBreak(parseInt(savedLongBreak, 10));
+    if (savedAlarm) setAlarmSound(savedAlarm);
+
+    // Only apply stored count if we DIDN’T reset today
+    if (!shouldReset && count) {
+      setPomodoroCount(parseInt(count, 10));
+    }
+
+  } catch (error) {
+    console.log('Error loading settings:', error);
+  }
+}, []);
+
 
   useEffect(() => {
     loadSettings();
