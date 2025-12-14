@@ -16,7 +16,7 @@ export default function WeeklyStatsCard({
   const maxCount = Math.max(...weeklyStats.daily, 1);
 
   const focusedMinutes = weeklyStats.focused;
-  const breakMinutes = weeklyStats.breaks * breakMinutesPerSession;
+  const breakMinutes = weeklyStats.breaks;
 
   const getDayLabel = index => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -79,11 +79,11 @@ export default function WeeklyStatsCard({
         <Text style={styles.totalsText}>
           Focused:{' '}
           <Text style={styles.totalsBold}>
-            {focusedMinutes} min
+            {focusedMinutes} mins
           </Text>{' '}
           Breaks:{' '}
           <Text style={styles.totalsBold}>
-            {breakMinutes} min
+            {breakMinutes} mins
           </Text>
         </Text>
       </View>

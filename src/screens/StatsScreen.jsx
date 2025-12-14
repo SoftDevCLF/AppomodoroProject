@@ -13,7 +13,6 @@ import RecentPomodorosList from '../components/stats/recent-pomodoro-list';
 import WeeklyStatsCard from '../components/stats/weekly-stats-card';
 
 
-const BREAK_MINUTES = 5;
 const cardBg = require('../../assets/img/bg.png')
 
 export default function StatsScreen() {
@@ -103,7 +102,6 @@ export default function StatsScreen() {
             styles={styles}
             bgImage={cardBg}
             onReset={resetStats}
-            breakMinutesPerSession={BREAK_MINUTES}
           />
       </ScrollView>
     </View>

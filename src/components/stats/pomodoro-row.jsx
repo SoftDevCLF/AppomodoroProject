@@ -13,7 +13,7 @@ export default function PomodoroRow({ item }) {
         </View>
       </View>
       <Text style={styles.recentMins}>
-        <Text style={styles.numSmall}>{item.minutes}</Text> m
+        <Text style={styles.numSmall}>{item.minutes} mins</Text> 
       </Text>
     </View>
   );
