@@ -24,6 +24,8 @@ export default function NewPomodoroScreen() {
   const [longBreak, setLongBreak] = useState(15);
   const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const intervalRef = useRef(null);
+  const sessionStartRef = useRef(null);
+
 
   
   const savePomodoroRecord = async (timerType, duration, breakType) => {
@@ -114,6 +116,16 @@ const updateWeeklyStats = async (type, minutes) => {
     console.log('Error updating weekly stats:', err);
   }
 };
+
+
+  const getElapsedMinutes = () => {
+    if (!sessionStartRef.current) return 0;
+
+    const { startedAt, initialSeconds } = sessionStartRef.current;
+    const elapsedSeconds = initialSeconds - timeLeft;
+
+    return Math.max(1, Math.round(elapsedSeconds / 60));
+  };
 
 
   const clearTimer = () => {
@@ -245,8 +257,6 @@ useEffect(() => {
 ]);
 
 
-
-
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -257,9 +267,13 @@ useEffect(() => {
 
   //Starts timer
   const handleStart = () => {
-    setSessionStartSeconds(timeLeft); 
     setIsRunning(true);
     setIsPaused(false);
+
+    sessionStartRef.current = {
+      startedAt: Date.now(),
+      initialSeconds: timeLeft,
+    };
   };
 
   //Pauses timer
@@ -277,39 +291,71 @@ useEffect(() => {
 
   //Changes to a short break timer
   const handleBreak = () => {
+    clearTimer();
     setIsRunning(false);
     setIsPaused(false);
-    clearTimer();
 
+    // ONLY count if user was in pomodoro
+    if (timerType === 'pomodoro' && sessionStartRef.current) {
+      const minutesWorked = getElapsedMinutes();
+
+      savePomodoroRecord('pomodoro', minutesWorked);
+      updateWeeklyStats('pomodoro', minutesWorked);
+
+      setPomodoroCount(count => {
+        const newCount = count + 1;
+        AsyncStorage.setItem('pomodoroCount', newCount.toString());
+        return newCount;
+      });
+    }
+
+    // Decide which break to go to
     if ((pomodoroCount + 1) % 4 === 0) {
-    // Long break after every 4th pomodoro
-    setTimerType('longBreak');
-    setTimeLeft(longBreak * 60);
-  } else {
-    // Otherwise, short break
-    setTimerType('shortBreak');
-    setTimeLeft(shortBreak * 60);
-  }
+      setTimerType('longBreak');
+      setTimeLeft(longBreak * 60);
+    } else {
+      setTimerType('shortBreak');
+      setTimeLeft(shortBreak * 60);
+    }
+
+    sessionStartRef.current = null;
   };
+
 
   //Skip break handler
   const handleSkipBreak = () => {
+    clearTimer();
     setIsRunning(false);
     setIsPaused(false);
-    clearTimer();
 
-    //Increase pomodoro count
-     // Increase pomodoro count
-  setPomodoroCount(current => {
-    const newCount = current + 1;
-    AsyncStorage.setItem('pomodoroCount', newCount.toString());
-    return newCount;
-  });
+    const elapsedMinutes = getElapsedMinutes();
 
-  // Reset to pomodoro
-  setTimerType('pomodoro');
-  setTimeLeft(defaultPomodoro * 60);
-};
+    // CASE 1: User skips DURING POMODORO
+    if (timerType === 'pomodoro') {
+      savePomodoroRecord('pomodoro', elapsedMinutes);
+      updateWeeklyStats('pomodoro', elapsedMinutes);
+
+      setPomodoroCount(count => {
+        const newCount = count + 1;
+        AsyncStorage.setItem('pomodoroCount', newCount.toString());
+        return newCount;
+      });
+    }
+
+    // CASE 2: User skips DURING BREAK
+    else {
+      savePomodoroRecord('break', elapsedMinutes, timerType);
+      updateWeeklyStats('break', elapsedMinutes);
+    }
+
+    // Always return to pomodoro
+    setTimerType('pomodoro');
+    setTimeLeft(defaultPomodoro * 60);
+
+    sessionStartRef.current = null;
+  };
+
+
 
   return (
 

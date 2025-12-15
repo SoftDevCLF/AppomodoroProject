@@ -89,9 +89,9 @@ export default function WeeklyStatsCard({
       </View>
 
       {/* Reset */}
-      {/* <Pressable onPress={onReset} style={styles.resetButton}>
+      <Pressable onPress={onReset} style={styles.resetButton}>
         <Text style={styles.resetText}>Reset Stats</Text>
-      </Pressable> */}
+      </Pressable>
     </ImageBackground>
   );
 }
