@@ -18,11 +18,103 @@ export default function NewPomodoroScreen() {
   const [isPaused, setIsPaused] = useState(false);
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [timerType, setTimerType] = useState('pomodoro');
+  const [sessionStartSeconds, setSessionStartSeconds] = useState(0);
   const [defaultPomodoro, setDefaultPomodoro] = useState(25);
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(15);
   const [alarmSound, setAlarmSound] = useState('sound1.mp3');
   const intervalRef = useRef(null);
+
+  
+  const savePomodoroRecord = async (timerType, duration, breakType) => {
+    try {
+      const record = {
+        emoji:
+          timerType === 'pomodoro'
+            ? '🍅'
+            : breakType === 'longBreak'
+            ? '😴'
+            : '💤',
+
+        title:
+          timerType === 'pomodoro'
+            ? 'Focus Session'
+            : breakType === 'longBreak'
+            ? 'Long Break'
+            : 'Short Break',
+
+        type: timerType,        
+        breakType,              
+
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+
+        minutes: duration,
+      };
+
+      const existing = await AsyncStorage.getItem('recentPomodoros');
+      const parsed = existing ? JSON.parse(existing) : [];
+
+      const updated = [record, ...parsed].slice(0, 20);
+
+      await AsyncStorage.setItem(
+        'recentPomodoros',
+        JSON.stringify(updated)
+      );
+
+      console.log('Saved recent record:', record);
+    } catch (err) {
+      console.log('Error saving pomodoro record:', err);
+    }
+  };
+
+
+const updateWeeklyStats = async (type, minutes) => {
+  try {
+    const today = new Date();
+    const dayIndex = today.getDay();
+
+    const existing = await AsyncStorage.getItem('weeklyStats');
+    const stats = existing
+      ? JSON.parse(existing)
+      : {
+          focused: 0,
+          breaks: 0,
+          streak: 0,
+          daily: [0, 0, 0, 0, 0, 0, 0],
+          lastActive: null,
+        };
+
+    if (type === 'pomodoro') {
+      stats.focused += minutes;       
+      stats.daily[dayIndex] += 1;
+    } else {
+      stats.breaks += minutes;        
+    }
+
+    const todayStr = today.toDateString();
+
+    if (!stats.lastActive) {
+      stats.streak = 1;
+    } else {
+      const diffDays =
+        (new Date(todayStr) - new Date(stats.lastActive)) /
+        (1000 * 60 * 60 * 24);
+
+      if (diffDays === 1) stats.streak += 1;
+      else if (diffDays > 1) stats.streak = 1;
+    }
+
+    stats.lastActive = todayStr;
+
+    await AsyncStorage.setItem('weeklyStats', JSON.stringify(stats));
+  } catch (err) {
+    console.log('Error updating weekly stats:', err);
+  }
+};
+
 
   const clearTimer = () => {
     if (intervalRef.current) {
@@ -81,55 +173,79 @@ export default function NewPomodoroScreen() {
 
 
   //Timer Effect
-  useEffect(() => {
-    if (isRunning && !isPaused) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft(prev => {
+useEffect(() => {
+  if (!isRunning || isPaused) {
+    clearInterval(intervalRef.current);
+    return;
+  }
 
-          if (prev <= 0) return 0;
+  intervalRef.current = setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(intervalRef.current);
 
-          const newTime = prev - 1;
+        try {
+          playAlarm(alarmSound);
+        } catch (e) {
+          console.log('Alarm failed safely');
+        }
 
-          if (newTime === 0) {
-            // Play alarm and show alert
-            playAlarm(alarmSound);
-             if (timerType === 'pomodoro') {
-                notifyTimesUp('work');
-              } else {
-                notifyTimesUp('break');
-              }
+        if (timerType === 'pomodoro') {
+          notifyTimesUp('work');
 
-            //Update pomodoro count if needed
-            if (timerType === 'pomodoro') {
-              //Increment pomodoro count
-              setPomodoroCount(current => {
-                const newCount = current + 1;
-                AsyncStorage.setItem('pomodoroCount', newCount.toString());
-                // Automatically start next break
-                if (newCount % 4 === 0) {
-                  setTimerType('longBreak');
-                  setTimeLeft(longBreak * 60);
-                } else {
-                  setTimerType('shortBreak');
-                  setTimeLeft(shortBreak * 60);
-                }
-                setIsPaused(false); //start break
-                return newCount;
-              });
+          const minutes = Math.max(1, Math.round(sessionStartSeconds / 60));
+
+          savePomodoroRecord('pomodoro', minutes);
+          updateWeeklyStats('pomodoro', minutes);
+
+          setPomodoroCount(count => {
+            const newCount = count + 1;
+            AsyncStorage.setItem('pomodoroCount', newCount.toString());
+
+            if (newCount % 4 === 0) {
+              setTimerType('longBreak');
+              setTimeLeft(longBreak * 60);
             } else {
-              //Break ends start new pomodoro
-               setTimerType('pomodoro');
-                setTimeLeft(defaultPomodoro * 60);
+              setTimerType('shortBreak');
+              setTimeLeft(shortBreak * 60);
             }
-          }
-          return newTime;
-        });
-      }, 1000);
-    } else {
-      clearTimer();
-    }
-    return () => clearTimer();
-  }, [isRunning, isPaused, timerType, defaultPomodoro, shortBreak, longBreak, alarmSound, pomodoroCount]);
+
+            return newCount;
+          });
+
+        } else {
+          notifyTimesUp('break');
+
+          const minutes =
+            timerType === 'longBreak' ? longBreak : shortBreak;
+
+          savePomodoroRecord('break', minutes, timerType);
+          updateWeeklyStats('break', minutes);
+
+          setTimerType('pomodoro');
+          setTimeLeft(defaultPomodoro * 60);
+        }
+
+        return 0;
+      }
+
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(intervalRef.current);
+}, [
+  isRunning,
+  isPaused,
+  timerType,
+  defaultPomodoro,
+  shortBreak,
+  longBreak,
+  alarmSound,
+]);
+
+
+
 
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
@@ -141,6 +257,7 @@ export default function NewPomodoroScreen() {
 
   //Starts timer
   const handleStart = () => {
+    setSessionStartSeconds(timeLeft); 
     setIsRunning(true);
     setIsPaused(false);
   };
