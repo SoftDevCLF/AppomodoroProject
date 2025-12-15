@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export default StyleSheet.create ({
+export default StyleSheet.create({
   frame: {
     flex: 1,
     backgroundColor: '#FFE1BD',
@@ -30,12 +30,12 @@ export default StyleSheet.create ({
     marginBottom: 30,
   },
   countNum: {
-  fontSize: 20,
-  fontFamily: 'PressStart2P-Regular',
-  marginLeft:10,
-  marginTop: 6,
-  color: '#3E2723',
-},
+    fontSize: 20,
+    fontFamily: 'PressStart2P-Regular',
+    marginLeft: 10,
+    marginTop: 6,
+    color: '#3E2723',
+  },
   timerLabel: {
     fontFamily: 'PixelifySans-Bold',
     fontSize: 18,
@@ -83,10 +83,12 @@ export default StyleSheet.create ({
     borderRadius: 10,
     borderWidth: 3,
     borderColor: '#ED5345',
-    backgroundColor: '#FFE4E4',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    backgroundColor: '#ff6b6b',
+    padding: 10,
+    marginVertical: 8,
   },
   btnStop: {
     width: 240,
@@ -105,10 +107,12 @@ export default StyleSheet.create ({
     borderRadius: 10,
     borderWidth: 3,
     borderColor: '#ED5345',
-    backgroundColor: '#FFE4E4',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: '#ff6b6b',
+    padding: 10,
+    marginVertical: 8,
   },
   btnGroup: {
     flexDirection: 'row',
@@ -138,7 +142,7 @@ export default StyleSheet.create ({
     marginBottom: 8,
   },
   btnText: {
-    color: '#8F2A1E',
+    color: 'white',
     fontFamily: 'PixelifySans-Bold',
     fontSize: 20,
     letterSpacing: 1,
