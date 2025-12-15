@@ -73,7 +73,7 @@ Make sure an Android emulator is running or a device is connected via USB with *
 2. Start the timer
 3. Work distraction-free until the session ends
 4. Take a break
-5. Repeat 🔁
+5. Repeat
 
 Appomodoro follows the classic **Pomodoro Technique**, promoting productivity through structured focus and rest cycles.
 
