@@ -1,97 +1,121 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Appomodoro Timer
 
-# Getting Started
+**Appomodoro Timer** is a clean, focused Pomodoro timer built for **Android** to help you stay productive, manage your time effectively, and avoid burnout. Designed with simplicity and usability in mind, Appomodoro makes it easy to focus on what matters—one session at a time.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Pomodoro Timer** – Work in focused intervals with structured breaks
+- **Custom Cycles** – Configure work and break durations
+- **Android-First Experience** – Optimized for Android devices
+- **Cute Pixel UI** – Charming pixel-style interface for a fun experience
+- **Smooth Performance** – Fast and responsive interactions
+- **Task Feature** - Enhance your productivity by creating, organizing, and managing tasks. Focus on what matters most and check off tasks as you complete them.
+- **Notifications** - Get notified when a Pomodoro or a break session ends, so you always know when to focus or relax.
+- **Sound Alerts** - Choose between gentle or motivating sounds to play at the end of each session to signal the transition between work and break periods.
+- **Productivity stats and session history** - Track completed sessions, check break times, review your daily or weekly progress, and see how productive you’ve been over time.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+## Tech Stack
 
-# OR using Yarn
-yarn start
+- **React Native** – Cross-platform mobile development
+- **Android Studio** – Android build, debugging, and emulator
+- **JavaScript (ES6+)** – Modern JavaScript features
+- **Gradle** – Android build system
+
+---
+
+## Screenshots
+
+> _Coming soon_
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+
+- Node.js (LTS recommended)
+- npm or yarn
+- Android Studio
+- Android SDK & Emulator or physical Android device
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/SoftDevCLF/AppomodoroProject
+cd appomodoro
 ```
 
-## Step 2: Build and run your app
+### Install Dependencies
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```bash
+npm install
+# or
+yarn install
 ```
 
-### iOS
+### Run on Android
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+npx react-native run-android
 ```
 
-Then, and every time you update your native dependencies, run:
+Make sure an Android emulator is running or a device is connected via USB with **USB Debugging** enabled.
 
-```sh
-bundle exec pod install
-```
+---
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## How It Works
 
-```sh
-# Using npm
-npm run ios
+1. Set your focus duration
+2. Start the timer
+3. Work distraction-free until the session ends
+4. Take a break
+5. Repeat 🔁
 
-# OR using Yarn
-yarn ios
-```
+Appomodoro follows the classic **Pomodoro Technique**, promoting productivity through structured focus and rest cycles.
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Development Notes
 
-## Step 3: Modify your app
+- Built and tested using **Android Studio Emulator**
+- Compatible with recent versions of React Native
+- Uses modern React patterns and hooks
 
-Now that you have successfully run the app, let's make changes!
+---
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## Future Improvements
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- Push notifications
+- Preset profiles (Study, Work, Deep Focus)
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+---
 
-## Congratulations! :tada:
 
-You've successfully run and modified your React Native App. :partying_face:
+## License
 
-### Now what?
+This project is intended for educational purposes.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+---
 
-# Troubleshooting
+## Team
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Developed by Tomateam:
 
-# Learn More
+- [**Dominique**](https://github.com/monic421)  
+- [**Cintya**](https://github.com/SoftDevCLF)  
+- [**Anna**](https://github.com/isayabs) 
+- [**Temi**](https://github.com/temsters) 
 
-To learn more about React Native, take a look at the following resources:
+## Acknowledgements
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- The Pomodoro Technique® by Francesco Cirillo
+- React Native community
+
+---
+
+> _Stay focused. Stay productive. One pomodoro at a time._ 🍅
+
