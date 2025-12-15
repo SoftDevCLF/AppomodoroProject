@@ -4,7 +4,6 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  Dimensions,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -34,7 +33,6 @@ export default function StatsScreen() {
     }, [])
   );
 
-
   const loadStats = async () => {
     try {
       const recent = await AsyncStorage.getItem('recentPomodoros');
@@ -50,29 +48,6 @@ export default function StatsScreen() {
 
     } catch (error) {
       console.log('Error loading stats:', error);
-    }
-  };
-
-  const resetStats = async () => {
-    try {
-      await AsyncStorage.multiRemove([
-        'recentPomodoros',
-        'weeklyStats',
-        'pomodoroCount',
-      ]);
-
-      setRecentPomodoros([]);
-      setWeeklyStats({
-        focused: 0,
-        breaks: 0,
-        streak: 0,
-        daily: [0, 0, 0, 0, 0, 0, 0],
-        lastActive: null,
-      });
-
-      console.log('Stats reset complete');
-    } catch (err) {
-      console.log('Error resetting stats:', err);
     }
   };
 
@@ -101,7 +76,6 @@ export default function StatsScreen() {
             weeklyStats={weeklyStats}
             styles={styles}
             bgImage={cardBg}
-            onReset={resetStats}
           />
       </ScrollView>
     </View>

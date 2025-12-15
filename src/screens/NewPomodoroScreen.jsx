@@ -197,7 +197,7 @@ export default function NewPomodoroScreen() {
           if (timerType === 'pomodoro') {
             notifyTimesUp('work');
 
-            const minutes = Math.max(1, Math.round(sessionStartSeconds / 60));
+            const minutes = getElapsedMinutes();
 
             savePomodoroRecord('pomodoro', minutes);
             updateWeeklyStats('pomodoro', minutes);
