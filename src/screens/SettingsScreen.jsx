@@ -138,6 +138,14 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.frame}>
+      <View style={styles.title}>
+          <Image
+            source={require('../../assets/img/settingstomato.png')}
+            style={styles.logoStyle}
+          />
+          
+          <Text style={styles.titleText}>Settings</Text>
+        </View>
       {/* Background image for the settings screen */}
       <ImageBackground
         source={require('../../assets/img/bg.png')}
@@ -146,14 +154,7 @@ export default function SettingsScreen() {
         resizeMode="cover"
       > 
       <ScrollView contentContainerStyle={styles.scrollViewStyle}>
-        <View style={styles.title}>
-          <Image
-            source={require('../../assets/img/settingstomato.png')}
-            style={styles.logoStyle}
-          />
-          
-          <Text style={styles.titleText}>Settings</Text>
-        </View>
+        
 
          {/*Time Inputs*/}
         <View style={styles.content}>
@@ -251,9 +252,12 @@ export default function SettingsScreen() {
             >
               <Text style={styles.selectOptionText}>Waves</Text>
             </Pressable>
-            <View style={{ marginTop: 15, alignItems: 'center'  }}>
-              <Pressable onPress={() => stopAlarm()} style={[styles.btn, { width: 86 }]}>
-                <Text style={styles.btnText}>Stop Preview</Text>
+            <View style={{ alignItems: 'center' }}>
+              <Pressable
+                onPress={stopAlarm}
+                style={styles.stopPreviewButton}
+              >
+                <Text style={styles.stopPreviewText}>Stop Preview</Text>
               </Pressable>
             </View>
 

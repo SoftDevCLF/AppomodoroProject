@@ -13,23 +13,30 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-
+    gap: 10,
+    backgroundColor: '#fff6e7',
     padding: 10,
     borderRadius: 12,
     marginBottom: 14,
+  },
+   imageStyle: {
+    borderRadius: 20,
   },
   logoStyle: {
     width: 50,
     height: 50,
   },
+  
   titleText: {
     fontSize: 30,
     color: '#000000',
     fontFamily: 'PixelifySans-Bold',
   },
+  
   content: {
     borderRadius: 12,
     padding: 16,
+    marginTop: 16,
   },
   label: {
     fontSize: 18,
@@ -52,6 +59,20 @@ export default StyleSheet.create({
     fontSize: 14,
     backgroundColor: '#fff',
   },
+  stopPreviewButton: {
+  marginTop: 12,
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 10,
+  borderWidth: 2,
+  borderColor: '#f4b871',
+  backgroundColor: '#fff',
+},
+stopPreviewText: {
+  fontFamily: 'PixelifySans-Bold',
+  fontSize: 12,
+  color: '#861d0a',
+},
   setButton: {
     backgroundColor: '#ffdede',
     color: '#861d0a',
