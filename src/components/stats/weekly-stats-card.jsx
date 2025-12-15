@@ -3,15 +3,12 @@ import {
   View,
   Text,
   ImageBackground,
-  Pressable,
 } from 'react-native';
 
 export default function WeeklyStatsCard({
   weeklyStats,
   styles,
   bgImage,
-  onReset,
-  breakMinutesPerSession = 5,
 }) {
   const maxCount = Math.max(...weeklyStats.daily, 1);
 
@@ -87,11 +84,6 @@ export default function WeeklyStatsCard({
           </Text>
         </Text>
       </View>
-
-      {/* Reset */}
-      {/* <Pressable onPress={onReset} style={styles.resetButton}>
-        <Text style={styles.resetText}>Reset Stats</Text>
-      </Pressable> */}
     </ImageBackground>
   );
 }
